@@ -7,89 +7,106 @@ export type SetState<T> = (
 ) => void;
 
 export interface Stores {
-  state: Partial<{
-    method: SwaggerEndpoint["method"];
-    path: string;
-    id: string;
-    href: string;
-    parameters: SwaggerEndpoint["parameters"];
-    showBody: boolean;
-    tryOut: boolean;
-    requestBody: SwaggerEndpoint["requestBody"];
-    responses: SwaggerEndpoint["responses"];
-    requestInit: RequestInit;
-    serverResponse: {
-      body: unknown;
-      contentType: string;
-    };
-  }>;
+  state: Array<
+    Partial<{
+      method: SwaggerEndpoint["method"];
+      path: string;
+      id: string;
+      href: string;
+      parameters: SwaggerEndpoint["parameters"];
+      showBody: boolean;
+      tryOut: boolean;
+      requestBody: SwaggerEndpoint["requestBody"];
+      responses: SwaggerEndpoint["responses"];
+      requestInit: RequestInit;
+      serverResponse: {
+        body: unknown;
+        contentType: string;
+      };
+    }>
+  >;
   setState: (props: this["state"]) => void;
-  setShowBody: (bool: boolean) => void;
-  setTryOut: (bool: boolean) => void;
-  setParameters: (params: SwaggerEndpoint["parameters"]) => void;
-  setRequestInit: SetState<RequestInit>;
-  setServerResponse: (response: this["state"]["serverResponse"]) => void;
+  setShowBody: (id: string, bool: boolean) => void;
+  setTryOut: (id: string, bool: boolean) => void;
+  setParameters: (id: string, params: SwaggerEndpoint["parameters"]) => void;
+  setRequestInit: (id: string, params: RequestInit) => void;
+  setServerResponse: (
+    id: string,
+    response: this["state"][number]["serverResponse"]
+  ) => void;
 }
 
-const initState: Stores["state"] = {};
+const initState: Stores["state"] = [];
 
-export const useEndpointStore = (key: string) =>
-  create<Stores>()(
-    persist(
-      (set) => ({
-        state: initState,
-        setState: (props) => {
-          set((s) => ({
-            ...s,
-            state: { ...s.state, ...props },
-          }));
-        },
-        setShowBody: (showBody) => {
-          set((s) => ({ state: { ...s.state, showBody } }));
-        },
-        setTryOut: (tryOut) => {
-          set((s) => ({ state: { ...s.state, tryOut } }));
-        },
-        setParameters: (parameters) => {
-          set((s) => ({ state: { ...s.state, parameters } }));
-        },
-        setServerResponse: (response) => {
-          console.log(response)
-          set((s) => ({
-            state: {
-              ...s.state,
-              serverResponse: response,
-            },
-          }));
-        },
-        setRequestInit: (requestInit) => {
-          if (typeof requestInit === "object") {
-            return set((s) => ({
-              state: {
-                ...s.state,
-                requestInit: {
-                  ...s.state.requestInit,
-                  ...requestInit,
-                },
-              },
-            }));
-          }
+const Store = create<Stores>()(
+  persist(
+    (set) => ({
+      state: initState,
+      setState: (props) => {
+        set((s) => ({
+          ...s,
+          state: [...s.state, ...props],
+        }));
+      },
+      setShowBody: (id, showBody) => {
+        set((s) => ({
+          state: s.state.map((endpoint) => ({
+            ...endpoint,
+            showBody: endpoint.id === id ? showBody : endpoint.showBody,
+          })),
+        }));
+      },
+      setTryOut: (id, tryOut) => {
+        set((s) => ({
+          state: s.state.map((endpoint) => ({
+            ...endpoint,
+            tryOut: endpoint.id === id ? tryOut : endpoint.tryOut,
+          })),
+        }));
+      },
+      setParameters: (id, parameters) => {
+        set((s) => ({
+          state: s.state.map((endpoint) => ({
+            ...endpoint,
+            parameters: endpoint.id === id ? parameters : endpoint.parameters,
+          })),
+        }));
+      },
+      setServerResponse: (id, response) => {
+        set((s) => ({
+          state: s.state.map((endpoint) => ({
+            ...endpoint,
+            serverResponse:
+              endpoint.id === id ? response : endpoint.serverResponse,
+          })),
+        }));
+      },
+      setRequestInit: (id, requestInit) => {
+        set((s) => ({
+          state: s.state.map((endpoint) => ({
+            ...endpoint,
+            requestInit:
+              endpoint.id === id
+                ? { ...endpoint.requestInit, ...requestInit }
+                : endpoint.requestInit,
+          })),
+        }));
+      },
+    }),
+    {
+      name: `endpoint-store`,
+      storage: createJSONStorage(() => window.sessionStorage),
+    }
+  )
+);
 
-          if (typeof requestInit === "function") {
-            return set((s) => ({
-              state: {
-                ...s.state,
-                requestInit: {
-                  ...requestInit(s.state),
-                },
-              },
-            }));
-          }
-        },
-      }),
-      {
-        name: `endpoint-store-${key}`,
-        storage: createJSONStorage(() => window.sessionStorage),
-      }
-    )
-  )();
+export const useEndpointStore = (id: string) => {
+  const store = Store();
+
+  const setState = (props: Stores["state"]) => store.setState(props);
+
+  return {
+    state: store.state.find((endpoint) => endpoint.id === id)!,
+    setState,
+  };
+};
