@@ -1,0 +1,620 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api": {
+      "post": {
+        "operationId": "AppController_sendMessage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageDTO"
+              }
+            },
+            "text/stream": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageDTO"
+                }
+              },
+              "text/stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "AppController_getAllMessages",
+        "parameters": [
+          {
+            "name": "phone",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "default": "573000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/roles": {
+      "post": {
+        "operationId": "AppController_getRoles",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/sse": {
+      "get": {
+        "operationId": "SseController_render",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "SseController_btn",
+        "parameters": [
+          {
+            "name": "counter",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/sse/all": {
+      "post": {
+        "operationId": "SseController_cron",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notificaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sse/{id}": {
+      "get": {
+        "operationId": "SseController_sse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mensaje",
+            "content": {
+              "text/stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Notificaciones",
+            "content": {
+              "text/stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/worker": {
+      "get": {
+        "operationId": "WorkerController_addCounter",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/audio/transcode": {
+      "post": {
+        "operationId": "AudioController_transcode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueueDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/audio/upload-single-file": {
+      "post": {
+        "operationId": "AudioController_xlsx",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/FileDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/mongoose": {
+      "post": {
+        "operationId": "MongooseController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMongooseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "MongooseController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/mongoose/{id}": {
+      "patch": {
+        "operationId": "MongooseController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMongooseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "MongooseController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/typeorm": {
+      "post": {
+        "operationId": "TypeormController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTypeormDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "TypeormController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/typeorm/{id}": {
+      "patch": {
+        "operationId": "TypeormController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTypeormDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "TypeormController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/multi-db-typeorm": {
+      "post": {
+        "operationId": "MultiDbTypeormController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTypeormDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "MultiDbTypeormController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/multi-db-typeorm/{id}": {
+      "patch": {
+        "operationId": "MultiDbTypeormController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTypeormDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "MultiDbTypeormController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/download-file": {
+      "get": {
+        "operationId": "DownloadFileController_download",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "NestJS example",
+    "description": "The NestJS API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "SendMessageDTO": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "default": "5730000000002"
+          },
+          "message": {
+            "type": "string",
+            "default": "Hello world"
+          }
+        },
+        "required": [
+          "phone",
+          "message"
+        ]
+      },
+      "NotificationsDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "default": "notification"
+          },
+          "data": {
+            "type": "string",
+            "default": "notification value"
+          }
+        },
+        "required": [
+          "event",
+          "data"
+        ]
+      },
+      "Counter": {
+        "type": "object",
+        "properties": {
+          "counter": {
+            "type": "number",
+            "default": 0
+          }
+        },
+        "required": [
+          "counter"
+        ]
+      },
+      "CounterDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "default": "counter"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Counter"
+          }
+        },
+        "required": [
+          "event",
+          "data"
+        ]
+      },
+      "QueueDTO": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "default": "audio.mp3"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "FileDTO": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "CreateMongooseDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateMongooseDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateTypeormDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "default": "label"
+          },
+          "value": {
+            "type": "string",
+            "default": "label"
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ]
+      },
+      "UpdateTypeormDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "default": "label"
+          },
+          "value": {
+            "type": "string",
+            "default": "label"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ]
+}

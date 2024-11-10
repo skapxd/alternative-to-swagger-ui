@@ -1,0 +1,48 @@
+{
+  "name": "alternative-swagger",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ci": "vitest --watch false",
+    "test:ui": "vite preview --outDir test-reporter"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "4.6.0",
+    "@swc/cli": "0.4.0",
+    "@swc/core": "1.7.35",
+    "@types/mime-types": "2.1.4",
+    "@types/node": "22.8.7",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.14.1",
+    "mime-types": "2.1.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "reflect-metadata": "0.2.2",
+    "unplugin-swc": "1.5.1",
+    "zustand": "5.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.13.0",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "4.3.3",
+    "@vitest/coverage-v8": "2.1.4",
+    "@vitest/ui": "2.1.4",
+    "eslint": "9.13.0",
+    "eslint-plugin-react-hooks": "5.0.0",
+    "eslint-plugin-react-refresh": "0.4.14",
+    "globals": "15.11.0",
+    "happy-dom": "15.8.3",
+    "typescript": "~5.6.2",
+    "typescript-eslint": "8.11.0",
+    "vite": "5.4.10",
+    "vitest": "2.1.4"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
