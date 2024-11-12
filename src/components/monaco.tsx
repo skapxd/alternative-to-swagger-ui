@@ -1,17 +1,22 @@
-import { Editor } from "@monaco-editor/react";
+import { Editor, Monaco as MonacoType } from "@monaco-editor/react";
+import { editor } from "monaco-editor";
 
 interface MonacoProps {
   defaultValue?: string;
   onChange?: (value: string | undefined) => void;
   value?: string
   options?: { readOnly: boolean };
+  language?: string;
+  onMount?: (editor: editor.IStandaloneCodeEditor, monaco: MonacoType) => void;
+  beforeMount?: (monaco: unknown) => void;
 }
 
 export const Monaco: React.FC<MonacoProps> = ({
-  defaultValue,
+  defaultValue = '',
   onChange = () => null,
-  value,
-  options
+  options = {},
+  language = 'json',
+  onMount = () => null,
 }) => {
   const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const theme = prefersDarkMode ? 'vs-dark' : 'vs-light';
@@ -24,10 +29,11 @@ export const Monaco: React.FC<MonacoProps> = ({
         automaticLayout: true
       }}
       defaultLanguage={'json'}
-      value={value}
+      language={language}
       defaultValue={defaultValue}
       height={"300px"}
       onChange={onChange}
+      onMount={onMount}
     />
   );
 };

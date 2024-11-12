@@ -7,7 +7,8 @@ export type SetState<T> = (
 ) => void;
 
 export interface Stores {
-  state: Array<
+  state: Record<
+    string,
     Partial<{
       method: SwaggerEndpoint["method"];
       path: string;
@@ -32,64 +33,99 @@ export interface Stores {
   setRequestInit: (id: string, params: RequestInit) => void;
   setServerResponse: (
     id: string,
-    response: this["state"][number]["serverResponse"]
+    response: (
+      props: this["state"][string]["serverResponse"]
+    ) =>
+      | this["state"][string]["serverResponse"]
+      | this["state"][string]["serverResponse"]
   ) => void;
 }
 
-const initState: Stores["state"] = [];
+const initState: Stores["state"] = {};
 
 const Store = create<Stores>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       state: initState,
       setState: (props) => {
         set((s) => ({
           ...s,
-          state: [...s.state, ...props],
+          state: { ...s.state, ...props },
         }));
       },
       setShowBody: (id, showBody) => {
         set((s) => ({
-          state: s.state.map((endpoint) => ({
-            ...endpoint,
-            showBody: endpoint.id === id ? showBody : endpoint.showBody,
-          })),
+          state: {
+            ...s.state,
+            [id]: {
+              ...s.state[id],
+              showBody,
+            },
+          },
         }));
       },
       setTryOut: (id, tryOut) => {
         set((s) => ({
-          state: s.state.map((endpoint) => ({
-            ...endpoint,
-            tryOut: endpoint.id === id ? tryOut : endpoint.tryOut,
-          })),
+          state: {
+            ...s.state,
+            [id]: {
+              ...s.state[id],
+              tryOut,
+            },
+          },
         }));
       },
       setParameters: (id, parameters) => {
         set((s) => ({
-          state: s.state.map((endpoint) => ({
-            ...endpoint,
-            parameters: endpoint.id === id ? parameters : endpoint.parameters,
-          })),
+          state: {
+            ...s.state,
+            [id]: {
+              ...s.state[id],
+              parameters,
+            },
+          },
         }));
       },
       setServerResponse: (id, response) => {
-        set((s) => ({
-          state: s.state.map((endpoint) => ({
-            ...endpoint,
-            serverResponse:
-              endpoint.id === id ? response : endpoint.serverResponse,
-          })),
-        }));
+        if (typeof response === "function") {
+          const current = get().state[id];
+          set((s) => ({
+            state: {
+              ...s.state,
+              [id]: {
+                ...s.state[id],
+                serverResponse: response(current.serverResponse),
+              },
+            },
+          }));
+          return;
+        }
+
+        if (typeof response === "object") {
+          set((s) => ({
+            state: {
+              ...s.state,
+              [id]: {
+                ...s.state[id],
+                serverResponse: response,
+              },
+            },
+          }));
+          return;
+        }
       },
       setRequestInit: (id, requestInit) => {
         set((s) => ({
-          state: s.state.map((endpoint) => ({
-            ...endpoint,
-            requestInit:
-              endpoint.id === id
-                ? { ...endpoint.requestInit, ...requestInit }
-                : endpoint.requestInit,
-          })),
+          state: {
+            ...s.state,
+            [id]: {
+              ...s.state[id],
+              requestInit: {
+                ...s.state[id].requestInit,
+                ...requestInit,
+              },
+            },
+          },
         }));
       },
     }),
@@ -105,8 +141,24 @@ export const useEndpointStore = (id: string) => {
 
   const setState = (props: Stores["state"]) => store.setState(props);
 
+  const setParameters = (props: SwaggerEndpoint["parameters"]) =>
+    store.setParameters(id, props);
+
+  const setRequestInit = (props: RequestInit) =>
+    store.setRequestInit(id, props);
+
+  const setTryOut = (props: boolean) => store.setTryOut(id, props);
+
+  const setServerResponse = (
+    props: Parameters<Stores["setServerResponse"]>[1]
+  ) => store.setServerResponse(id, props);
+
   return {
-    state: store.state.find((endpoint) => endpoint.id === id)!,
+    state: store.state[id] ?? {},
     setState,
+    setParameters,
+    setRequestInit,
+    setTryOut,
+    setServerResponse,
   };
 };

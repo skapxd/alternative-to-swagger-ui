@@ -40,7 +40,7 @@ export interface SwaggerEndpoint {
     in: "query" | "path" | "header" | "cookie";
     value: unknown;
     schema: {
-      default: unknown;
+      default?: unknown;
       type: unknown;
     };
   }>;

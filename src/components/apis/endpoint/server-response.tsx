@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from "react"
 import { Monaco } from "../../monaco"
-import { useEndpointStore } from "./state"
+import { editor } from "monaco-editor"
 
 interface Props {
   id: string
@@ -8,11 +9,50 @@ interface Props {
 export const ServerResponse = (props: Props) => {
   const { id } = props ?? {}
 
-  const { state } = useEndpointStore(id)
-  const { serverResponse } = state
-  console.log('ServerResponse: ', props.id)
-  console.log({ serverResponse })
-  if (serverResponse == null) return <></>
+  const [state, setState] = useState({
+    body: '',
+    contentType: ''
+  })
+
+  const ref = useRef<editor.IStandaloneCodeEditor | null>(null)
+
+  useEffect(() => {
+
+    const fn = (e: CustomEvent) => {
+      const { body, contentType } = e.detail
+
+      if (contentType.includes('stream')) {
+        const acc = ref.current?.getValue() ?? ''
+        ref.current?.setValue(body + acc)
+        setState(() => ({ body, contentType }))
+        return
+      }
+
+      if (contentType.includes('pdf')) {
+        setState(() => ({ body, contentType }))
+        return
+      }
+
+      if (contentType.includes('json')) {
+        console.log('json: ', body)
+        ref.current?.setValue(JSON.stringify(body, null, 2))
+        setState(() => ({ body, contentType }))
+        return
+      }
+    }
+
+    window.addEventListener(`server_response_${id}`, fn)
+
+    return () => {
+      window.removeEventListener(`server_response_${id}`, fn)
+    }
+  }, [id])
+
+  if (state.body === '') {
+    return <></>
+  }
+
+  console.log('ServerResponse: ', state)
 
   return (
     <div className="responses-inner">
@@ -98,16 +138,24 @@ export const ServerResponse = (props: Props) => {
                   <div>
                     <h5>Response body</h5>
                     <div className="highlight-code">
-                      <div className="download-contents">Download</div>
-                      <div className="copy-to-clipboard">
-                        <button>
-                        </button>
-                      </div>
-                      <pre className=" microlight" style={{
-                        display: 'block', overflowX: 'auto', padding: '0.5em', background: 'rgb(51, 51, 51)', color: 'white'
-                      }}>
-                        {JSON.stringify(serverResponse, null, 2)}
-                      </pre>
+                      {state.contentType.includes('pdf') && (
+                        <iframe
+                          src={state.body ?? ''}
+                          frameBorder="0"
+                          width='100%'
+                          height='600px'
+                        />
+                      )}
+
+                      {state.contentType.match(/(json)|(stream)/) && (
+                        <Monaco
+                          options={{ readOnly: true }}
+                          // defaultValue={state.body}
+                          onMount={(editor) => {
+                            ref.current = editor
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
                   <div>

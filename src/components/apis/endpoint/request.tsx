@@ -1,4 +1,5 @@
 import { useGlobalStore } from "#/src/global-state"
+import { getUrlWithParameters } from "./fn/get-url-with-parametes"
 import { Parameters } from "./parameters"
 import { RequestBody } from "./request-body"
 import { useEndpointStore } from "./state"
@@ -10,7 +11,7 @@ interface Props {
 
 export const Request = (props: Props) => {
 
-  const { setTryOut, state, setServerResponse } = useEndpointStore(props.id)
+  const { setTryOut, state } = useEndpointStore(props.id)
 
   const { state: globalState } = useGlobalStore()
   const { tryOut } = state
@@ -57,32 +58,83 @@ export const Request = (props: Props) => {
             onClick={async () => {
               if (!globalState.url || !state.requestInit || !state.path) return
 
-              const url = new URL(state.path, globalState.url.origin)
+              const path = (() => {
+                const __ = getUrlWithParameters(state.path, state.parameters ?? [])
+                return __
+              })()
+
+              const url = new URL(path, globalState.url.origin)
 
               const resp = await fetch(url, state.requestInit)
 
               const contentType = mime.contentType(resp.headers.get('content-type') ?? '')
-              console.log('requestContentTypeOptions: ', contentType)
-              console.log('Request: ', props.id)
+
               if (typeof contentType === 'boolean') {
                 return
               }
 
-              if (contentType.includes('application/pdf')) {
+              if (contentType.includes('pdf')) {
                 const blob = await resp.blob()
                 const body = window.URL.createObjectURL(blob)
-                setServerResponse({ body, contentType })
+                window.dispatchEvent(new CustomEvent(`server_response_${props.id}`, {
+                  detail:
+                  {
+                    body,
+                    contentType
+                  }
+                }))
+
                 return
               }
 
-              if (contentType.includes('application/json')) {
+              if (contentType.includes('json')) {
                 const body = await resp.json()
-                setServerResponse({ body, contentType })
+                window.dispatchEvent(new CustomEvent(`server_response_${props.id}`, {
+                  detail:
+                  {
+                    body,
+                    contentType
+                  }
+                }))
+
                 return
               }
 
+              if (contentType.includes('stream')) {
+                // Get the readable stream from the response body
+                const stream = resp.body!;
 
+                // Get the reader from the stream
+                const reader = stream.getReader();
 
+                // Define a function to read each chunk
+                const readChunk = async () => {
+
+                  // Read a chunk from the reader
+                  const { value, done } = await reader.read()
+
+                  if (done) return;
+
+                  // Convert the chunk value to a string
+                  const chunkString = new TextDecoder().decode(value);
+
+                  window.dispatchEvent(new CustomEvent(`server_response_${props.id}`, {
+                    detail:
+                    {
+                      body: chunkString,
+                      contentType
+                    }
+                  }))
+
+                  // Read the next chunk
+                  readChunk();
+
+                };
+
+                // Start reading the first chunk
+                await readChunk();
+                return
+              }
             }}
           >
             Execute

@@ -29,25 +29,28 @@ export const Endpoint = (props: Props) => {
       return _
     })()
 
-    setState({
-      method,
-      path,
-      id,
-      href,
-      parameters,
-      tryOut: false,
-      showBody: false,
-      requestBody,
-      responses,
-      serverResponse: { body: null, contentType: '' },
-      requestInit: {
-        method,
-        headers: {
-          "Content-Type": firstContentType,
-          // "Accept": firstAccept
+    setState(
+      {
+        [id]: {
+          method,
+          path,
+          id,
+          href,
+          parameters,
+          tryOut: false,
+          showBody: false,
+          requestBody,
+          responses,
+          serverResponse: { body: null, contentType: '' },
+          requestInit: {
+            method,
+            headers: {
+              "Content-Type": firstContentType
+            }
+          }
         }
       }
-    })
+    )
   }, [])
 
   return (
