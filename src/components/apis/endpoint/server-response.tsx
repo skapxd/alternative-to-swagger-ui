@@ -34,7 +34,6 @@ export const ServerResponse = (props: Props) => {
       }
 
       if (contentType.includes('json')) {
-        console.log('json: ', body)
         ref.current?.setValue(JSON.stringify(body, null, 2))
         setState(() => ({ body, contentType }))
         return
@@ -47,12 +46,6 @@ export const ServerResponse = (props: Props) => {
       window.removeEventListener(`server_response_${id}`, fn)
     }
   }, [id])
-
-  if (state.body === '') {
-    return <></>
-  }
-
-  console.log('ServerResponse: ', state)
 
   return (
     <div className="responses-inner">
@@ -147,7 +140,7 @@ export const ServerResponse = (props: Props) => {
                         />
                       )}
 
-                      {state.contentType.match(/(json)|(stream)/) && (
+                      {!state.contentType.match(/(pdf)/) && (
                         <Monaco
                           options={{ readOnly: true }}
                           // defaultValue={state.body}

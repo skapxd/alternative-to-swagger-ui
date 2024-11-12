@@ -76,36 +76,34 @@ export const Request = (props: Props) => {
               if (contentType.includes('pdf')) {
                 const blob = await resp.blob()
                 const body = window.URL.createObjectURL(blob)
-                window.dispatchEvent(new CustomEvent(`server_response_${props.id}`, {
+                const event = new CustomEvent(`server_response_${props.id}`, {
                   detail:
                   {
                     body,
                     contentType
                   }
-                }))
+                })
+                window.dispatchEvent(event)
 
                 return
               }
 
               if (contentType.includes('json')) {
                 const body = await resp.json()
-                window.dispatchEvent(new CustomEvent(`server_response_${props.id}`, {
+                const event = new CustomEvent(`server_response_${props.id}`, {
                   detail:
                   {
                     body,
                     contentType
                   }
-                }))
-
+                })
+                window.dispatchEvent(event)
                 return
               }
 
               if (contentType.includes('stream')) {
-                // Get the readable stream from the response body
-                const stream = resp.body!;
-
                 // Get the reader from the stream
-                const reader = stream.getReader();
+                const reader = resp.body!.getReader();
 
                 // Define a function to read each chunk
                 const readChunk = async () => {
