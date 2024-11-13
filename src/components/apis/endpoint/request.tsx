@@ -103,19 +103,14 @@ export const Request = (props: Props) => {
 
               if (contentType.includes('stream')) {
                 // Get the reader from the stream
-                const reader = resp.body!.getReader();
+                if (!resp.body) return
 
-                // Define a function to read each chunk
-                const readChunk = async () => {
+                // @ts-expect-error: [resp.body] sí tiene el método [Symbol.asyncIterator]
+                // pero no está tipado en la librería de typescript
+                for await (const chunk of resp.body) {
+                  if ((chunk instanceof Uint8Array) === false) return
 
-                  // Read a chunk from the reader
-                  const { value, done } = await reader.read()
-
-                  if (done) return;
-
-                  // Convert the chunk value to a string
-                  const chunkString = new TextDecoder().decode(value);
-
+                  const chunkString = new TextDecoder().decode(chunk)
                   window.dispatchEvent(new CustomEvent(`server_response_${props.id}`, {
                     detail:
                     {
@@ -123,14 +118,8 @@ export const Request = (props: Props) => {
                       contentType
                     }
                   }))
+                }
 
-                  // Read the next chunk
-                  readChunk();
-
-                };
-
-                // Start reading the first chunk
-                await readChunk();
                 return
               }
             }}
