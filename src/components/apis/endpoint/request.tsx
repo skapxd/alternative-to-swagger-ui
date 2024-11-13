@@ -1,4 +1,5 @@
 import { useGlobalStore } from "#/src/global-state"
+import { processFetchStream } from "#/src/utils/process-fetch-stream"
 import { getUrlWithParameters } from "./fn/get-url-with-parametes"
 import { Parameters } from "./parameters"
 import { RequestBody } from "./request-body"
@@ -105,20 +106,13 @@ export const Request = (props: Props) => {
                 // Get the reader from the stream
                 if (!resp.body) return
 
-                // @ts-expect-error: [resp.body] sí tiene el método [Symbol.asyncIterator]
-                // pero no está tipado en la librería de typescript
-                for await (const chunk of resp.body) {
-                  if ((chunk instanceof Uint8Array) === false) return
+                await processFetchStream(resp.body, (chunk) => {
+                  const event = new CustomEvent(`server_response_${props.id}`, {
+                    detail: { body: chunk, contentType }
+                  })
 
-                  const chunkString = new TextDecoder().decode(chunk)
-                  window.dispatchEvent(new CustomEvent(`server_response_${props.id}`, {
-                    detail:
-                    {
-                      body: chunkString,
-                      contentType
-                    }
-                  }))
-                }
+                  window.dispatchEvent(event)
+                })
 
                 return
               }
